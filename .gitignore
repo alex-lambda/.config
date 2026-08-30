@@ -1,0 +1,17 @@
+# ---- macOS ----
+.DS_Store
+
+# ---- Secrets / credentials (NEVER commit) ----
+# Pickled OAuth access_token + refresh_token
+ok/auth_refresh
+
+# ---- Runtime / ephemeral state ----
+# herdr: pane & tab layout state, logs, sockets, plugin lock
+herdr/session.json
+herdr/sessions/
+herdr/*.log
+herdr/*.sock
+herdr/.plugins.lock
+
+# ---- Build output ----
+# (sketchybar/.gitignore already covers helper/.build, helpers/**/bin, *.sock)
