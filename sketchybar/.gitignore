@@ -1,0 +1,14 @@
+# Swift build products
+helper/.build/
+helper/.swiftpm/
+
+# Compiled C helpers
+helpers/**/bin/
+
+# Local helper runtime state
+*.sock
+*.socket
+
+# Local agent artifacts
+.pi-subagents/
+.DS_Store

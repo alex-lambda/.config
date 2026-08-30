@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Focused-window highlight configuration for JankyBorders.
+borders \
+  active_color=0xff89b4fa \
+  inactive_color=0x00000000 \
+  width=4.0 \
+  hidpi=on \
+  style=round

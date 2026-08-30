@@ -1,0 +1,92 @@
+#!/bin/sh
+
+# SketchyBar normally provides CONFIG_DIR. Resolve it once so every sourced
+# module and plugin path remains stable regardless of the invoking directory.
+if [ -z "${CONFIG_DIR:-}" ]; then
+  CONFIG_DIR=$(CDPATH= cd "$(dirname "$0")" && pwd -P)
+else
+  CONFIG_DIR=$(CDPATH= cd "$CONFIG_DIR" && pwd -P)
+fi
+export CONFIG_DIR
+
+SKETCHYBAR=${SKETCHYBAR:-sketchybar}
+PLUGIN_DIR="$CONFIG_DIR/plugins"
+TEXT_FONT="MesloLGS Nerd Font:Bold:13.0"
+MONO_FONT="MesloLGS Nerd Font:Regular:12.0"
+ICON_FONT="MesloLGS Nerd Font:Regular:14.0"
+export PLUGIN_DIR
+
+# The battery menu is implemented by a small local AppKit agent. Start it with
+# SketchyBar, but keep reloads idempotent by checking the socket first.
+HELPER_BUILD_DIR="$CONFIG_DIR/helper/.build/debug"
+HELPER_AGENT="$HELPER_BUILD_DIR/MenuBarAgent"
+HELPER_CLI="$HELPER_BUILD_DIR/sketchybar-helperctl"
+export HELPER_CLI
+
+# The watcher is independent of SketchyBar's process, so it survives config
+# reloads. Keep a verified PID file to avoid launching duplicates while also
+# recovering from a stale file after a reboot or manual kill.
+MENUBAR_WATCHER="$CONFIG_DIR/helpers/menubar_watch/bin/menubar_watch"
+MENUBAR_WATCHER_PIDFILE="${TMPDIR:-/tmp}/sketchybar-menubar-watch.pid"
+MENUBAR_WATCHER_LOG="${TMPDIR:-/tmp}/sketchybar-menubar-watch.log"
+if [ -x "$MENUBAR_WATCHER" ]; then
+  menubar_watcher_pid=
+  if [ -r "$MENUBAR_WATCHER_PIDFILE" ]; then
+    IFS= read -r menubar_watcher_pid <"$MENUBAR_WATCHER_PIDFILE" || true
+  fi
+
+  if ! case "$menubar_watcher_pid" in
+    ''|*[!0-9]*) false ;;
+    *) kill -0 "$menubar_watcher_pid" 2>/dev/null &&
+       ps -p "$menubar_watcher_pid" -o command= 2>/dev/null |
+         grep -Fq "$MENUBAR_WATCHER" ;;
+  esac; then
+    rm -f "$MENUBAR_WATCHER_PIDFILE"
+    "$MENUBAR_WATCHER" >>"$MENUBAR_WATCHER_LOG" 2>&1 &
+    printf '%s\n' "$!" >"$MENUBAR_WATCHER_PIDFILE"
+  fi
+fi
+
+if [ -x "$HELPER_AGENT" ] && [ -x "$HELPER_CLI" ] &&
+   ! "$HELPER_CLI" ping >/dev/null 2>&1; then
+  "$HELPER_AGENT" >>"${TMPDIR:-/tmp}/sketchybar-helper.log" 2>&1 &
+fi
+
+# shellcheck source=config/palette.sh
+. "$CONFIG_DIR/config/palette.sh"
+
+# A reload owns the complete item graph. Clear it before rebuilding so manual
+# sourcing and repeated reloads cannot retain demo or duplicate items.
+"$SKETCHYBAR" --remove '/.*/' >/dev/null 2>&1 || true
+"$SKETCHYBAR" --add event aerospace_workspace_change
+"$SKETCHYBAR" --add event battery_menu_state
+
+# shellcheck source=config/defaults.sh
+. "$CONFIG_DIR/config/defaults.sh"
+# Left side, in visual order.
+# shellcheck source=config/app.sh
+. "$CONFIG_DIR/config/app.sh"
+# shellcheck source=config/workspaces.sh
+. "$CONFIG_DIR/config/workspaces.sh"
+
+# Right-positioned items stack from right to left, so source in reverse visual
+# order to produce [CPU RAM] [Wi-Fi + rates] [Battery] [Date/Time].
+# shellcheck source=config/clock.sh
+. "$CONFIG_DIR/config/clock.sh"
+# shellcheck source=config/battery.sh
+. "$CONFIG_DIR/config/battery.sh"
+# shellcheck source=config/wifi.sh
+. "$CONFIG_DIR/config/wifi.sh"
+# shellcheck source=config/metrics.sh
+. "$CONFIG_DIR/config/metrics.sh"
+
+# Native full-screen visibility is handled by show_in_fullscreen=off. This
+# hidden observer only reflects the battery helper's menu lifecycle event.
+"$SKETCHYBAR" --add item shell_observer center \
+  --set shell_observer \
+    drawing=off \
+    updates=on \
+    script="$PLUGIN_DIR/fullscreen.sh" \
+  --subscribe shell_observer battery_menu_state
+
+"$SKETCHYBAR" --update
