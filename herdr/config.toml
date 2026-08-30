@@ -1,0 +1,49 @@
+# Herdr equivalents of ~/.config/tmux/tmux.conf.
+
+[theme]
+# Herdr's Catppuccin dark theme corresponds to Catppuccin Mocha.
+name = "catppuccin"
+
+[terminal]
+# New splits and tabs inherit the active pane's working directory.
+new_cwd = "follow"
+
+[keys]
+# Match tmux's Ctrl-Space prefix.
+prefix = "ctrl+space"
+
+# Match vim-tmux-navigator's pane navigation keys.
+focus_pane_left = ["ctrl+left", "ctrl+h"]
+focus_pane_right = ["ctrl+right", "ctrl+l"]
+focus_pane_up = "ctrl+k"
+focus_pane_down = "ctrl+j"
+
+# Match tmux's default split keys: % opens right and " opens below.
+split_vertical = "prefix+%"
+split_horizontal = 'prefix+"'
+
+# Herdr copy mode is vi-style: v selects and y copies to the system clipboard.
+copy_mode = "prefix+["
+
+[ui]
+# Match tmux's mouse support and automatic clipboard integration.
+mouse_capture = true
+copy_on_select = true
+
+# Use tmux-style internal splitters rather than framed, gapped panes.
+pane_borders = true
+pane_outer_borders = false
+pane_scrollbars = false
+pane_gaps = false
+
+# tmux displays its window list and status line at the bottom.
+tab_bar_position = "bottom"
+
+# Match the effective Catppuccin status modules: application, session, uptime.
+# (@catppuccin_status_ram is unset in the current tmux plugin installation.)
+tab_bar_right = [
+  { type = "command", command = "~/.config/herdr/status.sh application", interval_seconds = 5, timeout_seconds = 2 },
+  { type = "command", command = "~/.config/herdr/status.sh session", interval_seconds = 60, timeout_seconds = 2 },
+  { type = "command", command = "~/.config/herdr/status.sh uptime", interval_seconds = 60, timeout_seconds = 2 },
+]
+tab_bar_right_separator = " "
