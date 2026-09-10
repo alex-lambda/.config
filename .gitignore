@@ -18,3 +18,13 @@ herdr/.plugins.lock
 
 # Herdr app-generated runtime data
 herdr/release-notes.json
+
+# pi: secrets and runtime state (live config is ~/.pi/agent)
+pi/auth.json
+pi/models-store.json
+pi/sessions/
+pi/run-history.jsonl
+pi/*.log
+pi/catppuccin-tui-state.json
+pi/skills/
+pi/npm/node_modules/
