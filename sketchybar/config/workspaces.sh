@@ -39,13 +39,13 @@ add_workspace() {
     --subscribe "workspace.$workspace" aerospace_workspace_change
 }
 
-for workspace_name in 1 2 3 4 5 6 7 8 9 B N T; do
+for workspace_name in 1 2 3 4 5 6 7 8 9; do
   add_workspace "$workspace_name"
 done
 
 "$SKETCHYBAR" --add bracket workspaces \
     workspace.1 workspace.2 workspace.3 workspace.4 workspace.5 workspace.6 \
-    workspace.7 workspace.8 workspace.9 workspace.B workspace.N workspace.T \
+    workspace.7 workspace.8 workspace.9 \
   --set workspaces \
     drawing=off \
     background.drawing=on \
