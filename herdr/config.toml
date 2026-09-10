@@ -30,7 +30,8 @@ copy_mode = "prefix+["
 mouse_capture = true
 copy_on_select = true
 
-# Use tmux-style internal splitters rather than framed, gapped panes.
+# Use separated, accented frames so the focused pane is unmistakable.
+accent = "blue"
 pane_borders = true
 pane_outer_borders = false
 pane_scrollbars = false

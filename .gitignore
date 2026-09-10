@@ -15,3 +15,6 @@ herdr/.plugins.lock
 
 # ---- Build output ----
 # (sketchybar/.gitignore already covers helper/.build, helpers/**/bin, *.sock)
+
+# Herdr app-generated runtime data
+herdr/release-notes.json
